@@ -84,22 +84,22 @@ backup_or_download_to_local() {
 	backup_or_download "$1" "$LOCAL_SHARE$1" "$LOCAL_SHARE"
 }
 
-printf "Select a platform (number):"
+printf "Select a program (number):"
 printf "\n1. Retroarch"
 printf "\n2. Yuzu"
 printf "\n3. RPCS3"
 printf "\n4. osu!lazer"
 printf "\n"
-read -r platform
+read -r program
 
-if [ "$platform" = "1" ]; then
+if [ "$program" = "1" ]; then
 	backup_or_download_to_config "$RETROARCH_DIR_NAME"
-elif [ "$platform" = "2" ]; then
+elif [ "$program" = "2" ]; then
 	backup_or_download_to_local "$YUZU_DIR_NAME"
-elif [ "$platform" = "3" ]; then
+elif [ "$program" = "3" ]; then
 	backup_or_download_to_config "$RPCS3_DIR_NAME"
-elif [ "$platform" = "4" ]; then
+elif [ "$program" = "4" ]; then
 	backup_or_download_to_local "$OSU_LAZER_DIR_NAME"
 else
-	printf "Error: Invalid platform"
+	printf "Error: Invalid program"
 fi
