@@ -11,7 +11,7 @@ A bash script made for backing up configs to cloud storage.
 To use the script, pass the directory to where you want your backups stored, for example:
 
 ```bash
-config-backup-cli.sh ~/Drive/Backups
+config-backup-cli ~/Drive/Backups
 ```
 
 ## Currently Supported Programs
