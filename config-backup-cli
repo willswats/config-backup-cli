@@ -15,15 +15,31 @@ YUZU_DIR_NAME="yuzu"
 RPCS3_DIR_NAME="rpcs3"
 OSU_LAZER_DIR_NAME="osu"
 
-trash_and_copy() {
-	if [ -d "$1" ]; then
-		trash "$1"
+check_dir_exists() {
+	if [ ! -d "$1" ]; then
+		printf "\nError: The directory %s does not exist" "$1"
+		exit
 	fi
+}
+
+trash_and_copy() {
+	# If directory $2 and $3 do not exist, then check_dir_exists will
+	# cause the code to exit, therefore, only trash if both of them exist
+	if [ -d "$1" ] && [ -d "$2" ] && [ -d "$3" ]; then
+		trash "$1"
+		printf "\nSent %s to the trash" "$1"
+	fi
+
+	# Make sure that cp is successful
+	check_dir_exists "$2"
+	check_dir_exists "$3"
+
 	cp -r "$2" "$3"
+	printf "\nCopied %s to %s" "$2" "$3"
 }
 
 get_confirmation() {
-	printf "This will trash %s and copy %s to %s" "$1" "$2" "$3"
+	printf "This will trash %s (if it exists) and copy %s to %s" "$1" "$2" "$3"
 	printf "\nAre you sure? y/n"
 	printf "\n"
 	read -r confirmation
