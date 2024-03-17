@@ -85,7 +85,7 @@ printf "Select a platform (number):"
 printf "\n1. Retroarch"
 printf "\n2. Yuzu"
 printf "\n3. RPCS3"
-printf "\n4. osu!"
+printf "\n4. osu!lazer"
 printf "\n"
 read -r platform
 
