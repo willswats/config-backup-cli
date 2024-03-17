@@ -14,7 +14,7 @@ OSU_LAZER_DIR_NAME="osu"
 
 version_info() {
 	printf "config-backup-cli %s\n" $VERSION
-	exit
+	exit 0
 }
 
 help_info() {
@@ -43,16 +43,16 @@ fi
 
 if [ ! -d "$1" ]; then
 	printf "Error: No directory specified, see --help for usage\n"
-	exit
+	exit 1
 elif ! echo "$1" | grep -q '\b/$'; then
 	printf "Error: Directory must end with a trailing /\n"
-	exit
+	exit 1
 fi
 
 check_dir_exists() {
 	if [ ! -d "$1" ]; then
 		printf "Error: The directory %s does not exist\n" "$1"
-		exit
+		exit 1
 	fi
 }
 
@@ -78,7 +78,7 @@ get_confirmation() {
 	read -r confirmation
 	if [ ! "$confirmation" = "y" ] && [ ! "$confirmation" = "Y" ]; then
 		printf "Aborted"
-		exit
+		exit 0
 	fi
 }
 
