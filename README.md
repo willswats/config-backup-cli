@@ -1,6 +1,6 @@
 # Config Backup CLI
 
-A bash script made for backing up configs to cloud storage.
+A shell script made for backing up configs to cloud storage.
 
 ## Dependencies
 
