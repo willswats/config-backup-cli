@@ -1,6 +1,10 @@
 #!/bin/sh
 
-# To use this script, pass a directory to it, such as ~/Drive/Backups
+if [ ! -d "$1" ]; then
+	printf "Error: no directory specified, pass an existing directory to the script to fix this, for example ~/Drive/Backups"
+	exit
+fi
+
 CLOUD_CONFIG_DEST="$1"
 
 CONFIG=$HOME/.config/
