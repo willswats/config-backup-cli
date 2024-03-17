@@ -3,6 +3,9 @@
 if [ ! -d "$1" ]; then
 	printf "Error: no directory specified, pass an existing directory to the script to fix this, for example ~/Drive/Backups/"
 	exit
+elif ! echo "$1" | grep -q '\b/$'; then
+	printf "Error: directory must end with a trailing /"
+	exit
 fi
 
 CLOUD_CONFIG_DEST="$1"
