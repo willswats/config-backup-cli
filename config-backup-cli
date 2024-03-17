@@ -1,7 +1,7 @@
 #!/bin/sh
 
 PROGRAM_NAME="config-backup-cli"
-VERSION="v1.3"
+VERSION="v1.4"
 
 CLOUD_CONFIG_DEST="$1"
 
