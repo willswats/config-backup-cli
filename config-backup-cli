@@ -34,7 +34,7 @@ get_confirmation() {
 }
 
 backup_or_download() {
-	printf "Select an option:"
+	printf "Select an option (number):"
 	printf "\n1. Backup"
 	printf "\n2. Download"
 	printf "\n"
@@ -65,7 +65,7 @@ backup_or_download_to_local() {
 	backup_or_download "$1" "$LOCAL_SHARE$1" "$LOCAL_SHARE"
 }
 
-printf "Select a platform:"
+printf "Select a platform (number):"
 printf "\n1. Retroarch"
 printf "\n2. Yuzu"
 printf "\n3. RPCS3"
