@@ -21,6 +21,7 @@ The features described here will only work with the [currently supported program
 
 ## Dependencies
 
+- grep
 - [trash-cli](https://github.com/andreafrancia/trash-cli)
 
 ## Usage
