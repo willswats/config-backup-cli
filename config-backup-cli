@@ -26,8 +26,7 @@ Options:
   -v, --version
     Show the version of the script
   -h, --help
-    Show this help message and exit
-\n" $PROGRAM_NAME $PROGRAM_NAME
+    Show this help message and exit\n" $PROGRAM_NAME $PROGRAM_NAME
 	exit 0
 }
 
