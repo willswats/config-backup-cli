@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PROGRAM_NAME="config-backup-cli"
+PROGRAM_NAME="quick-backup-cli"
 VERSION="v1.5"
 
 CONFIG_DEST="$1"
