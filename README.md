@@ -14,6 +14,8 @@ Quickly copy config directories to a specified location, and vice versa.
 ## Dependencies
 
 - grep
+- sed
+- cut
 - [trash-cli](https://github.com/andreafrancia/trash-cli)
 
 ## Usage
