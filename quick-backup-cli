@@ -86,7 +86,7 @@ print_programs() {
 	printf "Select a program (number):\n"
 	num=1
 	while IFS="," read -r program_name _; do
-		echo "$num. $program_name"
+		echo "$num. $program_name" | sed 's/\///g' # Remove slash
 		num=$((num + 1))
 	done <"$PROGRAMS_CSV"
 }
