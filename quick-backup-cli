@@ -7,21 +7,26 @@ CONFIG_DEST="$1"
 CONFIG=$HOME/.config/
 PROGRAMS_CSV="$CONFIG""$PROGRAM_NAME"/programs.csv
 
-# $1 directory
-check_trailing_slash() {
+add_trailing_slash_to_dir_if_not() {
 	if ! echo "$1" | grep -q '\b/$'; then
-		printf "Error: Directory must end with a trailing '/'.\n"
-		exit 1
+		echo "$1/"
 	fi
 }
 
-# $1 directory
 check_dir_exists() {
 	if [ ! -d "$1" ]; then
 		printf "Error: The directory '%s' does not exist.\n" "$1"
 		exit 1
 	fi
 }
+
+if [ ! -d "$1" ]; then
+	printf "Usage: %s [DIRECTORY]\n" $PROGRAM_NAME
+	printf "Try '%s --help' for more information.\n" $PROGRAM_NAME
+	exit 1
+else
+	CONFIG_DEST=$(add_trailing_slash_to_dir_if_not "$CONFIG_DEST")
+fi
 
 version_info() {
 	printf "%s %s\n" $PROGRAM_NAME $VERSION
@@ -46,14 +51,6 @@ fi
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	help_info
-fi
-
-if [ ! -d "$1" ]; then
-	printf "Usage: %s [DIRECTORY]\n" $PROGRAM_NAME
-	printf "Try '%s --help' for more information.\n" $PROGRAM_NAME
-	exit 1
-else
-	check_trailing_slash "$1"
 fi
 
 trash_and_copy() {
@@ -86,51 +83,59 @@ print_programs() {
 	printf "Select a program (number):\n"
 	num=1
 	while IFS="," read -r program_name _; do
-		echo "$num. $program_name" | sed 's/\///g' # Remove slash
+		printf "%s. %s\n" "$num" "$program_name" | sed 's/\///g'
 		num=$((num + 1))
 	done <"$PROGRAMS_CSV"
 }
 
 configure() {
-	printf "Enter program directory name (e.g. yuzu/):\n"
+	printf "Enter program directory name (e.g. retroarch):\n"
 	read -r program_name
-	printf "Enter program config directory (e.g. /home/user/.config/):\n"
+	printf "Enter program config directory (e.g. /home/user/.config):\n"
 	read -r program_directory
 
-	# TODO: check for preceding and trailing slash as the path must be absolute
-	check_trailing_slash "$program_name"
-	check_trailing_slash "$program_directory"
+	program_name=$(add_trailing_slash_to_dir_if_not "$program_name")
+	program_directory=$(add_trailing_slash_to_dir_if_not "$program_directory")
+
 	check_dir_exists "$program_directory"
 	check_dir_exists "$program_directory$program_name"
 
 	mkdir -p "$CONFIG""$PROGRAM_NAME"
 	echo "$program_name,$program_directory" >>"$PROGRAMS_CSV"
+
+	printf "Added %s!\n" "$program_name" | sed 's/\///g'
 }
 
 backup() {
-	print_programs
-	read -r program_num
-	program_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f1 -d",")
-	program_directory=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f2 -d",")
-	# TODO: check if line num exists
-
-	get_confirmation "$CONFIG_DEST$program_name" "$program_directory$program_name" "$CONFIG_DEST"
+	get_confirmation "$CONFIG_DEST$1" "$2$1" "$CONFIG_DEST"
 	printf "Backing up...\n"
-	trash_and_copy "$CONFIG_DEST$program_name" "$program_directory$program_name" "$CONFIG_DEST"
+	trash_and_copy "$CONFIG_DEST$1" "$2$1" "$CONFIG_DEST"
 	printf "Done!\n"
 }
 
 download() {
+	get_confirmation "$2$1" "$CONFIG_DEST$1" "$2"
+	printf "Downloading...\n"
+	trash_and_copy "$2$1" "$CONFIG_DEST$1" "$1"
+	printf "Done!\n"
+}
+
+backup_or_download() {
 	print_programs
 	read -r program_num
 	program_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f1 -d",")
 	program_directory=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f2 -d",")
-	# TODO: check if line num exists
 
-	get_confirmation "$program_directory$program_name" "$CONFIG_DEST$program_name" "$program_directory"
-	printf "Downloading...\n"
-	trash_and_copy "$program_directory$program_name" "$CONFIG_DEST$program_name" "$program_name"
-	printf "Done!\n"
+	if [ "$program_name" = "" ] || [ "$program_directory" = "" ]; then
+		printf "Error: Invalid program"
+		exit 1
+	fi
+
+	if [ "$1" = "backup" ]; then
+		backup "$program_name" "$program_directory"
+	elif [ "$2" = "download" ]; then
+		download "$program_name" "$program_directory"
+	fi
 }
 
 select_an_option() {
@@ -143,9 +148,9 @@ select_an_option() {
 	if [ "$option" = "1" ]; then
 		configure
 	elif [ "$option" = "2" ]; then
-		backup
+		backup_or_download "backup"
 	elif [ "$option" = "3" ]; then
-		download
+		backup_or_download "download"
 	else
 		printf "Error: Invalid option.\n"
 	fi
