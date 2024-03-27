@@ -9,6 +9,7 @@ Quickly copy config directories to a specified location, and vice versa.
 - [Dependencies](#dependencies)
 - [Usage](#usage)
 - [Features](#features)
+- [Configuration](#configuration)
 <!--toc:end-->
 
 ## Dependencies
