@@ -27,14 +27,13 @@ version_info() {
 }
 
 help_info() {
-	printf "Usage: %s [DIRECTORY]
-Example: %s ~/Drive/Backups/
+	printf "Usage: %s
 
 Options:
   -v, --version
     Show the version of the script
   -h, --help
-    Show this help message and exit\n" "$SCRIPT_NAME" "$SCRIPT_NAME"
+    Show this help message and exit\n" "$SCRIPT_NAME"
 	exit 0
 }
 
