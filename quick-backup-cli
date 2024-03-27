@@ -7,7 +7,7 @@ CONFIG_DEST="$1"
 CONFIG=$HOME/.config/
 PROGRAMS_CSV="$CONFIG""$PROGRAM_NAME"/programs.csv
 
-add_trailing_slash_to_dir_if_not() {
+add_trailing_slash_if_not() {
 	if ! echo "$1" | grep -q '\b/$'; then
 		echo "$1/"
 	fi
@@ -25,7 +25,7 @@ if [ ! -d "$1" ]; then
 	printf "Try '%s --help' for more information.\n" $PROGRAM_NAME
 	exit 1
 else
-	CONFIG_DEST=$(add_trailing_slash_to_dir_if_not "$CONFIG_DEST")
+	CONFIG_DEST=$(add_trailing_slash_if_not "$CONFIG_DEST")
 fi
 
 version_info() {
@@ -83,58 +83,60 @@ print_programs() {
 	printf "Select a program (number):\n"
 	num=1
 	while IFS="," read -r program_name _; do
-		printf "%s. %s\n" "$num" "$program_name" | sed 's/\///g'
+		printf "%s. %s\n" "$num" "$program_name"
 		num=$((num + 1))
 	done <"$PROGRAMS_CSV"
 }
 
 configure() {
-	printf "Enter program directory name (e.g. retroarch):\n"
+	printf "Enter program name:\n"
 	read -r program_name
-	printf "Enter program config directory (e.g. /home/user/.config):\n"
+	printf "Enter the program's config directory (e.g. /home/user/.config):\n"
 	read -r program_directory
+	printf "Enter the program's directory name (e.g. retroarch):\n"
+	read -r program_directory_name
 
-	program_name=$(add_trailing_slash_to_dir_if_not "$program_name")
-	program_directory=$(add_trailing_slash_to_dir_if_not "$program_directory")
+	program_directory=$(add_trailing_slash_if_not "$program_directory")
+	program_directory_name=$(add_trailing_slash_if_not "$program_directory_name")
 
 	check_dir_exists "$program_directory"
-	check_dir_exists "$program_directory$program_name"
+	check_dir_exists "$program_directory$program_directory_name"
 
-	mkdir -p "$CONFIG""$PROGRAM_NAME"
-	echo "$program_name,$program_directory" >>"$PROGRAMS_CSV"
+	mkdir -p "$CONFIG""$program_directory_name"
+	echo "$program_name,$program_directory,$program_directory_name" >>"$PROGRAMS_CSV"
 
-	printf "Added %s!\n" "$program_name" | sed 's/\///g'
+	printf "Added %s!\n" "$program_name"
 }
 
 backup() {
-	get_confirmation "$CONFIG_DEST$1" "$2$1" "$CONFIG_DEST"
+	get_confirmation "$CONFIG_DEST$2" "$1$2" "$CONFIG_DEST"
 	printf "Backing up...\n"
-	trash_and_copy "$CONFIG_DEST$1" "$2$1" "$CONFIG_DEST"
+	trash_and_copy "$CONFIG_DEST$2" "$1$2" "$CONFIG_DEST"
 	printf "Done!\n"
 }
 
 download() {
-	get_confirmation "$2$1" "$CONFIG_DEST$1" "$2"
+	get_confirmation "$1$2" "$CONFIG_DEST$2" "$1"
 	printf "Downloading...\n"
-	trash_and_copy "$2$1" "$CONFIG_DEST$1" "$1"
+	trash_and_copy "$1$2" "$CONFIG_DEST$2" "$1"
 	printf "Done!\n"
 }
 
 backup_or_download() {
 	print_programs
 	read -r program_num
-	program_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f1 -d",")
 	program_directory=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f2 -d",")
+	program_directory_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f3 -d",")
 
-	if [ "$program_name" = "" ] || [ "$program_directory" = "" ]; then
+	if [ "$program_directory" = "" ] || [ "$program_directory_name" = "" ]; then
 		printf "Error: Invalid program"
 		exit 1
 	fi
 
 	if [ "$1" = "backup" ]; then
-		backup "$program_name" "$program_directory"
-	elif [ "$2" = "download" ]; then
-		download "$program_name" "$program_directory"
+		backup "$program_directory" "$program_directory_name"
+	elif [ "$1" = "download" ]; then
+		download "$program_directory" "$program_directory_name"
 	fi
 }
 
