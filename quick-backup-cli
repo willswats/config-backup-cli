@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SCRIPT_NAME="quick-backup-cli"
-VERSION="v3.0"
+VERSION="v3.1"
 
 SCRIPT_CONFIG="$HOME"/.config/"$SCRIPT_NAME"/
 PROGRAMS_CSV="$SCRIPT_CONFIG"programs.csv
