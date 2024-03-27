@@ -3,8 +3,8 @@
 SCRIPT_NAME="quick-backup-cli"
 VERSION="v2.1"
 
-CONFIG=$HOME/.config/
-PROGRAMS_CSV="$CONFIG$SCRIPT_NAME/programs.csv"
+SCRIPT_CONFIG="$HOME"/.config/"$SCRIPT_NAME"/
+PROGRAMS_CSV="$SCRIPT_CONFIG"programs.csv
 
 add_trailing_slash_if_not() {
 	if ! echo "$1" | grep -q '\b/$'; then
@@ -102,7 +102,7 @@ configure() {
 	backup_directory=$(add_trailing_slash_if_not "$backup_directory")
 	check_dir_exists "$backup_directory"
 
-	mkdir -p "$CONFIG$SCRIPT_NAME"
+	mkdir -p "$SCRIPT_CONFIG"
 	echo "$program_name,$program_directory,$backup_directory" >>"$PROGRAMS_CSV"
 
 	printf "Added '%s'!\n" "$program_name"
