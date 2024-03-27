@@ -1,13 +1,12 @@
 # Quick Backup CLI
 
-Quickly copy config directories to a specified location, and vice versa.
+Quickly copy directories to a specified location, and vice versa.
 
 ## Table of Contents
 
 <!--toc:start-->
 
 - [Dependencies](#dependencies)
-- [Usage](#usage)
 - [Features](#features)
 - [Configuration](#configuration)
 <!--toc:end-->
@@ -19,19 +18,23 @@ Quickly copy config directories to a specified location, and vice versa.
 - cut
 - [trash-cli](https://github.com/andreafrancia/trash-cli)
 
-## Usage
-
-To use the script, pass the directory to where you want your config directories stored, for example:
-
-```bash
-quick-backup-cli ~/Drive/Backups
-```
-
 ## Features
 
-- Configure: add programs to `~/.config/quick-backup-cli/programs.csv` for use with `quick-backup-cli`.
-- Backup: copy the config directory of a program to your specified location. If the config directory already exists in your specified location, then send it to the trash.
-- Download: copy the config directory of a program from your specified location to it's config location. If the directory already exists in the config location, then send it to the trash.
+### Configure
+
+Add programs to `~/.config/quick-backup-cli/programs.csv` for use with `quick-backup-cli`.
+
+### Backup
+
+1. Trash (if it exists) the backup directory.
+2. Make the backup directory.
+3. Copy the contents of the program directory to the backup directory.
+
+### Download
+
+1. Trash (if it exists) the program directory.
+2. Make the program directory.
+3. Copy the contents of the backup directory to the program directory.
 
 ## Configuration
 
@@ -40,14 +43,14 @@ You can add programs to `quick-backup-cli` with the `configure` option when runn
 This is an example of a `programs.csv` file, located at `~/.config/quick-backup-cli/programs.csv`:
 
 ```csv
-Retroarch,/home/will/.config/,retroarch/
-RPCS3,/home/will/.config/,rpcs3/
+Retroarch,/home/user/.config/retroarch/,/home/user/Drive/Games/Backups/Retroarch/
+osu!,/home/user/.local/share/osu/,/home/user/Drive/Games/Backups/osuBackup/
 ```
 
 Explanation of columns (each value separated by a comma):
 
 1. The first column is the program name (only used within quick-backup-cli).
-2. The second column is the parent directory of the program's config directory.
-3. The third column is the program's config directory name.
+2. The second column is the path to the directory that you would like to backup.
+3. The third column is the path to the backup directory.
 
 The trailing `/` is required for the second and third column.
