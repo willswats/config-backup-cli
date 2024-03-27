@@ -1,25 +1,16 @@
 #!/bin/sh
 
-PROGRAM_NAME="quick-backup-cli"
+SCRIPT_NAME="quick-backup-cli"
 VERSION="v2.1"
 
-CONFIG_DEST="$1"
 CONFIG=$HOME/.config/
-PROGRAMS_CSV="$CONFIG$PROGRAM_NAME/programs.csv"
+PROGRAMS_CSV="$CONFIG$SCRIPT_NAME/programs.csv"
 
 add_trailing_slash_if_not() {
 	if ! echo "$1" | grep -q '\b/$'; then
 		echo "$1/"
 	else
 		echo "$1"
-	fi
-}
-
-add_home() {
-	if ! echo "$1" | grep -q '\b/$'; then
-		echo "$HOME/$1/"
-	else
-		echo "$HOME/$1"
 	fi
 }
 
@@ -31,7 +22,7 @@ check_dir_exists() {
 }
 
 version_info() {
-	printf "%s %s\n" "$PROGRAM_NAME" "$VERSION"
+	printf "%s %s\n" "$SCRIPT_NAME" "$VERSION"
 	exit 0
 }
 
@@ -43,7 +34,7 @@ Options:
   -v, --version
     Show the version of the script
   -h, --help
-    Show this help message and exit\n" "$PROGRAM_NAME" "$PROGRAM_NAME"
+    Show this help message and exit\n" "$SCRIPT_NAME" "$SCRIPT_NAME"
 	exit 0
 }
 
@@ -51,32 +42,13 @@ if [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
 	version_info
 elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	help_info
-elif [ ! -d "$1" ]; then
-	printf "Usage: %s [DIRECTORY]\n" $PROGRAM_NAME
-	printf "Try '%s --help' for more information.\n" $PROGRAM_NAME
-	exit 1
-else
-	CONFIG_DEST=$(add_trailing_slash_if_not "$CONFIG_DEST")
 fi
 
-trash_and_copy() {
-	# If directory $2 and $3 do not exist, then check_dir_exists will
-	# cause the code to exit, therefore, only trash if both of them exist
-	if [ -d "$1" ] && [ -d "$2" ] && [ -d "$3" ]; then
-		trash "$1"
-		printf "Sent '%s' to the trash.\n" "$1"
-	fi
-
-	# Make sure that cp is successful
-	check_dir_exists "$2"
-	check_dir_exists "$3"
-
-	cp -r "$2" "$3"
-	printf "Copied '%s' to '%s'.\n" "$2" "$3"
-}
-
 get_confirmation() {
-	printf "This will trash '%s' (if it exists) and copy '%s' to '%s'.\n" "$1" "$2" "$3"
+	printf "This will:\n"
+	printf "  1. Trash (if it exists) '%s'\n" "$1"
+	printf "  2. Make the directory '%s'\n" "$1"
+	printf "  3. Copy the contents of '%s' to '%s'\n" "$2" "$1"
 	printf "Are you sure? y/n\n"
 	read -r confirmation
 	if [ ! "$confirmation" = "y" ] && [ ! "$confirmation" = "Y" ]; then
@@ -85,17 +57,32 @@ get_confirmation() {
 	fi
 }
 
+trash_and_copy() {
+	check_dir_exists "$2"
+
+	if [ -d "$1" ]; then
+		trash "$1"
+		printf "Sent '%s' to the trash.\n" "$1"
+	fi
+
+	mkdir -p "$1"
+	printf "Made the '%s' directory.\n" "$1"
+
+	cp -r "$2"* "$1"
+	printf "Copied the contents of '%s' to '%s'.\n" "$2" "$1"
+}
+
 print_programs() {
 	printf "Select a program (number):\n"
 	num=1
 	while IFS="," read -r program_name _; do
-		printf "%s. %s\n" "$num" "$program_name"
+		printf "  %s. %s\n" "$num" "$program_name"
 		num=$((num + 1))
 	done <"$PROGRAMS_CSV"
 }
 
 configure() {
-	printf "Enter program name (this is only used within %s):\n" $PROGRAM_NAME
+	printf "(1 of 5) Enter program name (this is only used within %s):\n" $SCRIPT_NAME
 	read -r program_name
 
 	if [ "$program_name" = "" ]; then
@@ -103,54 +90,53 @@ configure() {
 		exit 1
 	fi
 
-	printf "Enter the parent directory of the program's config directory, relative to your home directory.\n"
-	printf "Leave blank for your home directory (e.g. '.config', '.local'):\n"
+	printf "(2 of 5) Enter the parent directory of the program's config directory (e.g. '/home/user/.config', '/home/user/.local'):\n"
 	read -r program_directory
 
-	if [ "$program_directory" = "" ]; then
-		program_directory=$HOME/
-	else
-		program_directory=$(add_home "$program_directory")
-	fi
+	program_directory=$(add_trailing_slash_if_not "$program_directory")
 	check_dir_exists "$program_directory"
 
-	printf "Enter the program's config directory name (e.g. 'retroarch', 'rpcs3'):\n"
+	printf "(3 of 5) Enter the program's config directory name (e.g. 'retroarch', 'rpcs3'):\n"
 	read -r program_directory_name
-
-	if [ "$program_directory_name" = "" ]; then
-		printf "Error: program directory name cannot be empty.\n"
-		exit 1
-	fi
 
 	program_directory_name=$(add_trailing_slash_if_not "$program_directory_name")
 	check_dir_exists "$program_directory$program_directory_name"
 
-	mkdir -p "$CONFIG$PROGRAM_NAME"
-	echo "$program_name,$program_directory,$program_directory_name" >>"$PROGRAMS_CSV"
+	printf "(4 of 5) Enter the program's backup directory (e.g. '/home/user/drive/backups'):\n"
+	read -r backup_directory
+
+	backup_directory=$(add_trailing_slash_if_not "$backup_directory")
+	check_dir_exists "$backup_directory"
+
+	printf "(5 of 5) Enter the program's backup directory name (e.g. 'Retroarch', 'RPCS3Saves'):\n"
+	read -r backup_directory_name
+
+	backup_directory_name=$(add_trailing_slash_if_not "$backup_directory")
+	check_dir_exists "$backup_directory"
+
+	mkdir -p "$CONFIG$SCRIPT_NAME"
+	echo "$program_name,$program_directory,$program_directory_name,$backup_directory,$backup_directory_name" >>"$PROGRAMS_CSV"
 
 	printf "Added '%s'!\n" "$program_name"
 }
 
 backup() {
-	get_confirmation "$CONFIG_DEST$2" "$1$2" "$CONFIG_DEST"
+	get_confirmation "$2" "$1"
 	printf "Backing up...\n"
-	trash_and_copy "$CONFIG_DEST$2" "$1$2" "$CONFIG_DEST"
+	trash_and_copy "$2" "$1"
 	printf "Done!\n"
 }
 
 download() {
-	get_confirmation "$1$2" "$CONFIG_DEST$2" "$1"
+	get_confirmation "$1" "$2"
 	printf "Downloading...\n"
-	trash_and_copy "$1$2" "$CONFIG_DEST$2" "$1"
+	trash_and_copy "$1" "$2"
 	printf "Done!\n"
 }
 
 backup_or_download() {
 	if [ ! -f "$PROGRAMS_CSV" ]; then
 		printf "Error: backup or download requires '%s' to exist, run configure or create it manually\n" "$PROGRAMS_CSV"
-		exit 1
-	elif [ "$(sed -n '$=' "$PROGRAMS_CSV")" = "" ]; then
-		printf "Error: '%s' does not contain any programs, run configure or add them mannually\n" "$PROGRAMS_CSV"
 		exit 1
 	fi
 
@@ -159,24 +145,28 @@ backup_or_download() {
 
 	program_directory=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f2 -d",")
 	program_directory_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f3 -d",")
+	backup_directory=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f4 -d",")
+	backup_directory_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f5 -d",")
 
-	if [ "$program_directory" = "" ] || [ "$program_directory_name" = "" ]; then
+	if [ "$program_directory" = "" ] || [ "$program_directory_name" = "" ] || [ "$backup_directory" = "" ] || [ "$backup_directory_name" = "" ]; then
 		printf "Error: Invalid program\n"
 		exit 1
 	fi
 
 	if [ "$1" = "backup" ]; then
-		backup "$program_directory" "$program_directory_name"
+		mkdir -p "$backup_directory$backup_directory_name" # TODO: move or remove
+		backup "$program_directory$program_directory_name" "$backup_directory$backup_directory_name"
 	elif [ "$1" = "download" ]; then
-		download "$program_directory" "$program_directory_name"
+		mkdir -p "$backup_directory$backup_directory_name" # TODO: move or remove
+		download "$program_directory$program_directory_name" "$backup_directory$backup_directory_name"
 	fi
 }
 
 select_an_option() {
 	printf "Select an option (number):\n"
-	printf "1. Configure\n"
-	printf "2. Backup\n"
-	printf "3. Download\n"
+	printf "  1. Configure\n"
+	printf "  2. Backup\n"
+	printf "  3. Download\n"
 	read -r option
 
 	if [ "$option" = "1" ]; then
