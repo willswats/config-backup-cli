@@ -50,4 +50,4 @@ Explanation of columns (each value separated by a comma):
 2. The second column is the parent directory of the program's config directory.
 3. The third column is the program's config directory name.
 
-The trailing '/' is required for the second and third column.
+The trailing `/` is required for the second and third column.
