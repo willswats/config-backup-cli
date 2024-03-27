@@ -102,7 +102,7 @@ configure() {
 	check_dir_exists "$program_directory"
 	check_dir_exists "$program_directory$program_directory_name"
 
-	mkdir -p "$CONFIG""$program_directory_name"
+	mkdir -p "$CONFIG$PROGRAM_NAME"
 	echo "$program_name,$program_directory,$program_directory_name" >>"$PROGRAMS_CSV"
 
 	printf "Added %s!\n" "$program_name"
