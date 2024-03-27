@@ -132,7 +132,7 @@ configure() {
 	mkdir -p "$CONFIG$PROGRAM_NAME"
 	echo "$program_name,$program_directory,$program_directory_name" >>"$PROGRAMS_CSV"
 
-	printf "Added %s!\n" "$program_name"
+	printf "Added '%s'!\n" "$program_name"
 }
 
 backup() {
@@ -151,10 +151,10 @@ download() {
 
 backup_or_download() {
 	if [ ! -f "$PROGRAMS_CSV" ]; then
-		printf "Error: backup or download requires %s to exist, run configure or create it manually\n" "$PROGRAMS_CSV"
+		printf "Error: backup or download requires '%s' to exist, run configure or create it manually\n" "$PROGRAMS_CSV"
 		exit 1
 	elif [ "$(sed -n '$=' "$PROGRAMS_CSV")" = "" ]; then
-		printf "Error: %s does not contain any programs, run configure or add them mannually\n" "$PROGRAMS_CSV"
+		printf "Error: '%s' does not contain any programs, run configure or add them mannually\n" "$PROGRAMS_CSV"
 		exit 1
 	fi
 
