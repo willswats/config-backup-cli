@@ -10,6 +10,16 @@ PROGRAMS_CSV="$CONFIG$PROGRAM_NAME/programs.csv"
 add_trailing_slash_if_not() {
 	if ! echo "$1" | grep -q '\b/$'; then
 		echo "$1/"
+	else
+		echo "$1"
+	fi
+}
+
+add_home() {
+	if ! echo "$1" | grep -q '\b/$'; then
+		echo "$HOME/$1/"
+	else
+		echo "$HOME/$1"
 	fi
 }
 
@@ -89,17 +99,34 @@ print_programs() {
 }
 
 configure() {
-	printf "Enter program name:\n"
+	printf "Enter program name (this is only used within %s):\n" $PROGRAM_NAME
 	read -r program_name
-	printf "Enter the program's config directory (e.g. /home/user/.config):\n"
+
+	if [ "$program_name" = "" ]; then
+		printf "Error: program name cannot be empty.\n"
+		exit 1
+	fi
+
+	printf "Enter the parent directory of the program's config directory, relative to your home directory.\n"
+	printf "Leave blank for your home directory (e.g. '.config', '.local'):\n"
 	read -r program_directory
-	printf "Enter the program's directory name (e.g. retroarch):\n"
+
+	if [ "$program_directory" = "" ]; then
+		program_directory=$HOME/
+	else
+		program_directory=$(add_home "$program_directory")
+	fi
+	check_dir_exists "$program_directory"
+
+	printf "Enter the program's config directory name (e.g. 'retroarch', 'rpcs3'):\n"
 	read -r program_directory_name
 
-	program_directory=$(add_trailing_slash_if_not "$program_directory")
-	program_directory_name=$(add_trailing_slash_if_not "$program_directory_name")
+	if [ "$program_directory_name" = "" ]; then
+		printf "Error: program directory name cannot be empty.\n"
+		exit 1
+	fi
 
-	check_dir_exists "$program_directory"
+	program_directory_name=$(add_trailing_slash_if_not "$program_directory_name")
 	check_dir_exists "$program_directory$program_directory_name"
 
 	mkdir -p "$CONFIG$PROGRAM_NAME"
@@ -123,8 +150,17 @@ download() {
 }
 
 backup_or_download() {
+	if [ ! -f "$PROGRAMS_CSV" ]; then
+		printf "Error: backup or download requires %s to exist, run configure or create it manually\n" "$PROGRAMS_CSV"
+		exit 1
+	elif [ "$(sed -n '$=' "$PROGRAMS_CSV")" = "" ]; then
+		printf "Error: %s does not contain any programs, run configure or add them mannually\n" "$PROGRAMS_CSV"
+		exit 1
+	fi
+
 	print_programs
 	read -r program_num
+
 	program_directory=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f2 -d",")
 	program_directory_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f3 -d",")
 
