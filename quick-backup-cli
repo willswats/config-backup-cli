@@ -84,7 +84,7 @@ get_confirmation() {
 	printf "Are you sure? y/n\n"
 	read -r confirmation
 	if [ ! "$confirmation" = "y" ] && [ ! "$confirmation" = "Y" ]; then
-		printf "Aborted."
+		printf "Aborted.\n"
 		exit 0
 	fi
 }
@@ -165,7 +165,7 @@ backup_or_download() {
 	program_directory_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f3 -d",")
 
 	if [ "$program_directory" = "" ] || [ "$program_directory_name" = "" ]; then
-		printf "Error: Invalid program"
+		printf "Error: Invalid program\n"
 		exit 1
 	fi
 
@@ -191,6 +191,7 @@ select_an_option() {
 		backup_or_download "download"
 	else
 		printf "Error: Invalid option.\n"
+		exit 1
 	fi
 }
 
