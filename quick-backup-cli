@@ -82,7 +82,7 @@ print_programs() {
 }
 
 configure() {
-	printf "(1 of 5) Enter program name (this is only used within %s):\n" $SCRIPT_NAME
+	printf "(1 of 3) Enter program name (this is only used within %s):\n" $SCRIPT_NAME
 	read -r program_name
 
 	if [ "$program_name" = "" ]; then
@@ -90,32 +90,20 @@ configure() {
 		exit 1
 	fi
 
-	printf "(2 of 5) Enter the parent directory of the program's config directory (e.g. '/home/user/.config', '/home/user/.local'):\n"
+	printf "(2 of 3) Enter the path to the directory that you would like to backup (e.g. '/home/user/.config/retroarch', '/home/user/.local/share/osu'):\n"
 	read -r program_directory
 
 	program_directory=$(add_trailing_slash_if_not "$program_directory")
 	check_dir_exists "$program_directory"
 
-	printf "(3 of 5) Enter the program's config directory name (e.g. 'retroarch', 'rpcs3'):\n"
-	read -r program_directory_name
-
-	program_directory_name=$(add_trailing_slash_if_not "$program_directory_name")
-	check_dir_exists "$program_directory$program_directory_name"
-
-	printf "(4 of 5) Enter the program's backup directory (e.g. '/home/user/drive/backups'):\n"
+	printf "(3 of 3) Enter the path to the backup directory (e.g. '/home/user/drive/backups'):\n"
 	read -r backup_directory
 
 	backup_directory=$(add_trailing_slash_if_not "$backup_directory")
 	check_dir_exists "$backup_directory"
 
-	printf "(5 of 5) Enter the program's backup directory name (e.g. 'Retroarch', 'RPCS3Saves'):\n"
-	read -r backup_directory_name
-
-	backup_directory_name=$(add_trailing_slash_if_not "$backup_directory")
-	check_dir_exists "$backup_directory"
-
 	mkdir -p "$CONFIG$SCRIPT_NAME"
-	echo "$program_name,$program_directory,$program_directory_name,$backup_directory,$backup_directory_name" >>"$PROGRAMS_CSV"
+	echo "$program_name,$program_directory,$backup_directory" >>"$PROGRAMS_CSV"
 
 	printf "Added '%s'!\n" "$program_name"
 }
@@ -144,21 +132,19 @@ backup_or_download() {
 	read -r program_num
 
 	program_directory=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f2 -d",")
-	program_directory_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f3 -d",")
-	backup_directory=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f4 -d",")
-	backup_directory_name=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f5 -d",")
+	backup_directory=$(sed -n "$program_num"p "$PROGRAMS_CSV" | cut -f3 -d",")
 
-	if [ "$program_directory" = "" ] || [ "$program_directory_name" = "" ] || [ "$backup_directory" = "" ] || [ "$backup_directory_name" = "" ]; then
+	if [ "$program_directory" = "" ] || [ "$backup_directory" = "" ]; then
 		printf "Error: Invalid program\n"
 		exit 1
 	fi
 
 	if [ "$1" = "backup" ]; then
-		mkdir -p "$backup_directory$backup_directory_name" # TODO: move or remove
-		backup "$program_directory$program_directory_name" "$backup_directory$backup_directory_name"
+		mkdir -p "$backup_directory" # TODO: move or remove
+		backup "$program_directory" "$backup_directory"
 	elif [ "$1" = "download" ]; then
-		mkdir -p "$backup_directory$backup_directory_name" # TODO: move or remove
-		download "$program_directory$program_directory_name" "$backup_directory$backup_directory_name"
+		mkdir -p "$backup_directory" # TODO: move or remove
+		download "$program_directory" "$backup_directory"
 	fi
 }
 
