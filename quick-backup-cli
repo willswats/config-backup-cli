@@ -140,10 +140,8 @@ backup_or_download() {
 	fi
 
 	if [ "$1" = "backup" ]; then
-		mkdir -p "$backup_directory" # TODO: move or remove
 		backup "$program_directory" "$backup_directory"
 	elif [ "$1" = "download" ]; then
-		mkdir -p "$backup_directory" # TODO: move or remove
 		download "$program_directory" "$backup_directory"
 	fi
 }
