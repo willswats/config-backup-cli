@@ -30,14 +30,6 @@ check_dir_exists() {
 	fi
 }
 
-if [ ! -d "$1" ]; then
-	printf "Usage: %s [DIRECTORY]\n" $PROGRAM_NAME
-	printf "Try '%s --help' for more information.\n" $PROGRAM_NAME
-	exit 1
-else
-	CONFIG_DEST=$(add_trailing_slash_if_not "$CONFIG_DEST")
-fi
-
 version_info() {
 	printf "%s %s\n" "$PROGRAM_NAME" "$VERSION"
 	exit 0
@@ -57,10 +49,14 @@ Options:
 
 if [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
 	version_info
-fi
-
-if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+elif [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
 	help_info
+elif [ ! -d "$1" ]; then
+	printf "Usage: %s [DIRECTORY]\n" $PROGRAM_NAME
+	printf "Try '%s --help' for more information.\n" $PROGRAM_NAME
+	exit 1
+else
+	CONFIG_DEST=$(add_trailing_slash_if_not "$CONFIG_DEST")
 fi
 
 trash_and_copy() {
